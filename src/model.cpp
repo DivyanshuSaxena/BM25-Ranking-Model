@@ -20,11 +20,11 @@ using namespace boost;
 
 // FIXME: Weights corresponding to different sections of the topic document.
 const int weights[7] = {1 /* domain_weight */,
-                        4 /* title_weight */,
+                        1 /* title_weight */,
                         1 /* desc_weight */,
                         1 /* summary_weight */,
-                        2 /* narrative_weight */,
-                        3 /* concept_weight */,
+                        1 /* narrative_weight */,
+                        1 /* concept_weight */,
                         1 /* def_weight */};
 
 class RunQueries {
