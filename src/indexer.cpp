@@ -20,6 +20,11 @@ using pugi::xml_parse_result;
 using namespace std;
 using namespace boost;
 
+// FIXME: Weights corresponding to different tags of the document.
+const int weights[5] = {1 /* text_weight */, 10 /* head_weight */,
+                        2 /* person_weight */, 2 /* organization_weight */,
+                        2 /* location_weight */};
+
 class CreateIndex {
  public:
   map<string, map<string, int>> inverted_index;
@@ -51,7 +56,10 @@ class CreateIndex {
   }
 
   // Tokenize words from text and add them to the Inverted Index List.
-  void addToIndex(string text, string docno) {
+  void addToIndex(string text, string docno, int tag_type = 0) {
+    // Find the additional frequency factor
+    int freq = weights[tag_type];
+
     // Tokenize text to get final index terms
     char_separator<char> sep(",;.-!?_'` ()\"");
     tokenizer<char_separator<char>> tokens(text, sep);
@@ -62,6 +70,7 @@ class CreateIndex {
         continue;
       }
 
+      // Get the document length and place it in the map.
       if (curr_docno.compare(docno) == 0) {
         num_words += 1;
       } else {
@@ -78,13 +87,13 @@ class CreateIndex {
         // Search if this document is present.
         auto doc_search = search->second.find(docno);
         if (doc_search != search->second.end()) {
-          doc_search->second += 1;
+          doc_search->second += freq;
         } else {
-          search->second.emplace(docno, 1);
+          search->second.emplace(docno, freq);
         }
       } else {
         map<string, int> term_document_map;
-        term_document_map.emplace(docno, 1);
+        term_document_map.emplace(docno, freq);
         inverted_index.emplace(t, term_document_map);
       }
     }
@@ -127,14 +136,27 @@ class CreateIndex {
       for (xml_node doc : file.child("FILE").children("DOC")) {
         string docno = doc.child_value("DOCNO");
         trim(docno);
+        // Read the headline of the document.
+        string headline = doc.child_value("HEAD");
+        addToIndex(to_lower_copy(headline), docno, 1);
+
+        // Read the actual text in the document.
         for (xml_node doc_text = doc.child("TEXT"); doc_text;
              doc_text = doc_text.next_sibling("TEXT")) {
           for (xml_node tag = doc_text.first_child(); tag;
                tag = tag.next_sibling()) {
-            // Currently, treating all children as equivalent.
-            // TODO: Use the tags for relevant information.
+            // Use the tags for relevant information.
+            string tag_name = tag.name();
             string text = tag.text().get();
-            addToIndex(to_lower_copy(text), docno);
+            if (tag_name.compare("PERSON")) {
+              addToIndex(to_lower_copy(text), docno, 2);
+            } else if (tag_name.compare("LOCATION")) {
+              addToIndex(to_lower_copy(text), docno, 3);
+            } else if (tag_name.compare("ORGANIZATION")) {
+              addToIndex(to_lower_copy(text), docno, 4);
+            } else {
+              addToIndex(to_lower_copy(text), docno);
+            }
           }
         }
       }
