@@ -30,6 +30,8 @@
 *.exe
 *.out
 *.app
+Indexer
+bm25_run
 
 # User data files
 dataset/
