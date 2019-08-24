@@ -53,7 +53,7 @@ class CreateIndex {
   // Tokenize words from text and add them to the Inverted Index List.
   void addToIndex(string text, string docno) {
     // Tokenize text to get final index terms
-    char_separator<char> sep(",;.-!?_'` ()\"");
+    char_separator<char> sep(",;.-!?_'` ()\"\n\t");
     tokenizer<char_separator<char>> tokens(text, sep);
     for (const auto &t : tokens) {
       // Check if term is not a stopword

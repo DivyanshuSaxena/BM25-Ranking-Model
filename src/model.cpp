@@ -240,7 +240,7 @@ class ParseInputs {
     int num_blank_lines = 0;
     string line;
     while (getline(open_file, line)) {
-      char_separator<char> sep(",;:.-!?_'` ()\"");
+      char_separator<char> sep(",;:.-!?_'` ()\"\n\t");
       tokenizer<char_separator<char>> tokens(line, sep);
 
       // Break and return if two blank lines read.
@@ -265,7 +265,7 @@ class ParseInputs {
     string line;
     int topic_no = 50;
     while (getline(topics_file, line)) {
-      char_separator<char> sep(",;:.-!?_'` ()\"");
+      char_separator<char> sep(",;:.-!?_'` ()\"\n\t");
       tokenizer<char_separator<char>> tokens(line, sep);
 
       // Get the first term to dicriminatively analyze tags
